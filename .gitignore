@@ -1,3 +1,9 @@
+# Claude Code
+.claude/
+
+# design handoff archive
+design.tar.gz
+
 # dependencies
 node_modules/
 
