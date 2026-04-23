@@ -3,99 +3,89 @@ import { T, serif, sans } from '@/lib/tokens';
 
 type NavPage = 'home' | 'shop' | 'about';
 
-export function Nav({ page = 'home' }: { page?: NavPage }) {
-  const leftLinks: { label: string; href: string; key: NavPage | string }[] = [
-    { label: 'Shop', href: '/shop', key: 'shop' },
-    { label: 'Collections', href: '/shop', key: 'collections' },
-    { label: 'Custom', href: '/about', key: 'custom' },
-    { label: 'Journal', href: '/', key: 'journal' },
-  ];
+const LEFT_LINKS = [
+  { label: 'Shop', href: '/shop', key: 'shop' },
+  { label: 'Collections', href: '/shop', key: 'collections' },
+  { label: 'Custom', href: '/about', key: 'custom' },
+  { label: 'Journal', href: '/', key: 'journal' },
+];
 
+const MOBILE_LINKS = [
+  { label: 'Shop', href: '/shop' },
+  { label: 'About', href: '/about' },
+  { label: 'Custom', href: '/about' },
+  { label: 'Bag (0)', href: '/' },
+];
+
+const linkStyle = (active: boolean): React.CSSProperties => ({
+  color: T.ink,
+  textDecoration: 'none',
+  borderBottom: active ? `1px solid ${T.ink}` : 'none',
+  paddingBottom: 2,
+  whiteSpace: 'nowrap' as const,
+});
+
+export function Nav({ page = 'home' }: { page?: NavPage }) {
   return (
     <header
       style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr auto 1fr',
-        alignItems: 'center',
-        padding: '22px 48px',
         borderBottom: `1px solid ${T.rule}`,
         background: T.bg,
         position: 'relative',
         zIndex: 5,
       }}
     >
+      <div
+        className="ttk-nav"
+        style={{ fontFamily: sans, fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', fontWeight: 500 }}
+      >
+        {/* Left nav — hidden on mobile */}
+        <nav className="ttk-nav-left">
+          {LEFT_LINKS.map(({ label, href, key }) => (
+            <Link key={label} href={href} style={linkStyle(page === key)}>
+              {label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Logo — always visible */}
+        <Link href="/" style={{ textAlign: 'center', textDecoration: 'none' }}>
+          <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 26, color: T.ink, lineHeight: 1 }}>
+            tietheknot
+          </div>
+          <div style={{ fontFamily: sans, fontSize: 9, letterSpacing: '0.42em', color: T.inkSoft, marginTop: 4 }}>
+            F L O R I S T
+          </div>
+        </Link>
+
+        {/* Right nav — hidden on mobile */}
+        <nav className="ttk-nav-right" style={{ color: T.ink }}>
+          <Link href="/about" style={linkStyle(page === 'about')}>About</Link>
+          <span style={{ cursor: 'pointer' }}>Search</span>
+          <span style={{ cursor: 'pointer' }}>Account</span>
+          <span style={{ cursor: 'pointer' }}>
+            Bag <span style={{ color: T.muted }}>(0)</span>
+          </span>
+        </nav>
+      </div>
+
+      {/* Mobile nav strip — shown only on mobile */}
       <nav
+        className="ttk-nav-mobile"
         style={{
-          display: 'flex',
-          gap: 32,
           fontFamily: sans,
           fontSize: 11,
           letterSpacing: '0.22em',
           textTransform: 'uppercase',
           fontWeight: 500,
+          borderTop: `1px solid ${T.rule}`,
         }}
       >
-        {leftLinks.map(({ label, href, key }) => (
-          <Link
-            key={label}
-            href={href}
-            style={{
-              color: T.ink,
-              textDecoration: 'none',
-              borderBottom: page === key ? `1px solid ${T.ink}` : 'none',
-              paddingBottom: 2,
-            }}
-          >
+        {MOBILE_LINKS.map(({ label, href }) => (
+          <Link key={label} href={href} style={{ color: T.ink, textDecoration: 'none', whiteSpace: 'nowrap' }}>
             {label}
           </Link>
         ))}
-      </nav>
-
-      <Link href="/" style={{ textAlign: 'center', textDecoration: 'none' }}>
-        <div
-          style={{
-            fontFamily: serif,
-            fontStyle: 'italic',
-            fontSize: 26,
-            color: T.ink,
-            lineHeight: 1,
-          }}
-        >
-          tietheknot
-        </div>
-        <div
-          style={{
-            fontFamily: sans,
-            fontSize: 9,
-            letterSpacing: '0.42em',
-            color: T.inkSoft,
-            marginTop: 4,
-          }}
-        >
-          F L O R I S T
-        </div>
-      </Link>
-
-      <nav
-        style={{
-          display: 'flex',
-          gap: 28,
-          justifyContent: 'flex-end',
-          fontFamily: sans,
-          fontSize: 11,
-          letterSpacing: '0.22em',
-          textTransform: 'uppercase',
-          fontWeight: 500,
-        }}
-      >
-        <Link href="/about" style={{ color: T.ink, textDecoration: 'none' }}>
-          About
-        </Link>
-        <span style={{ color: T.ink, cursor: 'pointer' }}>Search</span>
-        <span style={{ color: T.ink, cursor: 'pointer' }}>Account</span>
-        <span style={{ color: T.ink, cursor: 'pointer' }}>
-          Bag <span style={{ color: T.muted }}>(0)</span>
-        </span>
       </nav>
     </header>
   );

@@ -24,27 +24,226 @@ html, body {
 button {
   transition: opacity 0.15s;
 }
-
 button:hover {
   opacity: 0.88;
 }
-
 a {
   transition: opacity 0.15s;
 }
-
 a:hover {
   opacity: 0.7;
 }
-
 img {
   display: block;
 }
-
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
 }
-
 p {
   margin: 0;
+}
+
+/* ─── Nav ─────────────────────────────────────────────────────────── */
+
+.ttk-nav {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 22px 48px;
+}
+.ttk-nav-left {
+  display: flex;
+  gap: 32px;
+}
+.ttk-nav-right {
+  display: flex;
+  gap: 28px;
+  justify-content: flex-end;
+}
+.ttk-nav-mobile {
+  display: none;
+  justify-content: center;
+  gap: 24px;
+  padding: 12px 20px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  flex-shrink: 0;
+}
+
+/* ─── Hero ────────────────────────────────────────────────────────── */
+
+.ttk-hero {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+}
+.ttk-hero-image {
+  padding: 64px;
+  min-height: 680px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ttk-hero-copy {
+  padding: 80px 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* ─── Section padding ─────────────────────────────────────────────── */
+
+.ttk-section {
+  padding: 96px 48px;
+}
+.ttk-section-md {
+  padding: 80px 48px;
+}
+.ttk-section-sm {
+  padding: 56px 48px;
+}
+
+/* ─── Grids ───────────────────────────────────────────────────────── */
+
+.ttk-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+}
+.ttk-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+}
+.ttk-grid-process {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 80px;
+  align-items: center;
+}
+.ttk-grid-process-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.ttk-footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+.ttk-pdp {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+}
+.ttk-pdp-image {
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+}
+.ttk-pdp-info {
+  padding: 64px 72px;
+}
+.ttk-related {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+}
+.ttk-story {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 80px;
+  align-items: start;
+}
+.ttk-about-founder {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 80px;
+}
+.ttk-about-info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+}
+
+/* ─── Shop ────────────────────────────────────────────────────────── */
+
+.ttk-shop-bar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  padding: 20px 48px;
+  align-items: center;
+  gap: 24px;
+}
+.ttk-shop-tabs {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+/* Column count driven by data attribute so media queries can override cleanly */
+.ttk-shop-grid { display: grid; }
+.ttk-shop-grid[data-density="loose"]    { grid-template-columns: repeat(2, 1fr); gap: 48px; }
+.ttk-shop-grid[data-density="standard"] { grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.ttk-shop-grid[data-density="dense"]   { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+/* ─── Tablet ≤ 1100px ─────────────────────────────────────────────── */
+
+@media (max-width: 1100px) {
+  .ttk-nav { padding: 20px 32px; }
+  .ttk-section { padding: 72px 32px; }
+  .ttk-section-md { padding: 60px 32px; }
+  .ttk-section-sm { padding: 48px 32px; }
+  .ttk-hero-copy { padding: 60px 48px; }
+
+  .ttk-grid-4 { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .ttk-related { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .ttk-footer-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+  .ttk-shop-bar { padding: 16px 32px; }
+  .ttk-shop-grid[data-density="dense"] { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ─── Mobile ≤ 768px ──────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  /* Nav */
+  .ttk-nav {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    padding: 16px 20px;
+    gap: 0;
+  }
+  .ttk-nav-left, .ttk-nav-right { display: none; }
+  .ttk-nav-mobile { display: flex; }
+
+  /* Hero */
+  .ttk-hero { grid-template-columns: 1fr; }
+  .ttk-hero-image { min-height: 300px; padding: 32px; }
+  .ttk-hero-copy { padding: 40px 20px; }
+
+  /* Sections */
+  .ttk-section { padding: 52px 20px; }
+  .ttk-section-md { padding: 48px 20px; }
+  .ttk-section-sm { padding: 36px 20px; }
+
+  /* Grids */
+  .ttk-grid-4 { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .ttk-grid-3 { grid-template-columns: 1fr; gap: 24px; }
+  .ttk-grid-process { grid-template-columns: 1fr; gap: 36px; }
+  .ttk-grid-process-steps { grid-template-columns: 1fr; gap: 0; }
+  .ttk-footer-grid { grid-template-columns: 1fr; gap: 28px; margin-bottom: 32px; }
+  .ttk-pdp { grid-template-columns: 1fr; }
+  .ttk-pdp-image { padding: 32px; }
+  .ttk-pdp-info { padding: 36px 20px; }
+  .ttk-related { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .ttk-story { grid-template-columns: 1fr; gap: 36px; }
+  .ttk-about-founder { grid-template-columns: 1fr; gap: 36px; }
+  .ttk-about-info { grid-template-columns: 1fr; gap: 0; }
+
+  /* Shop */
+  .ttk-shop-bar { grid-template-columns: 1fr; padding: 16px 20px; gap: 12px; }
+  .ttk-shop-tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; gap: 20px; }
+  .ttk-shop-grid[data-density="loose"],
+  .ttk-shop-grid[data-density="standard"],
+  .ttk-shop-grid[data-density="dense"] { grid-template-columns: repeat(2, 1fr); gap: 16px; }
 }

@@ -24,41 +24,22 @@ export default function PdpClient({ product }: { product: Product }) {
   const basePrice = parsePrice(product.price);
 
   return (
-    <div style={{ padding: '64px 72px' }}>
+    <div className="ttk-pdp-info">
       <Eyebrow>{product.collection} · One of One</Eyebrow>
 
-      <Display size={56} italic style={{ marginTop: 20, marginBottom: 12 }}>
+      <Display size={56} italic style={{ marginTop: 20, marginBottom: 12, fontSize: 'clamp(28px, 4vw, 56px)' }}>
         {product.title}
       </Display>
 
-      <div
-        style={{
-          display: 'flex',
-          gap: 16,
-          alignItems: 'center',
-          fontFamily: serif,
-          fontSize: 22,
-          color: T.ink,
-          marginBottom: 32,
-        }}
-      >
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center', fontFamily: serif, fontSize: 22, color: T.ink, marginBottom: 32, flexWrap: 'wrap' }}>
         <span>{product.price}</span>
-        <span
-          style={{
-            fontSize: 12,
-            color: T.muted,
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            fontFamily: sans,
-          }}
-        >
+        <span style={{ fontSize: 12, color: T.muted, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: sans }}>
           — incl. signed certificate
         </span>
       </div>
 
       <Body size={15} style={{ marginBottom: 32 }}>
-        {product.description ??
-          'A handmade piece composed from preserved florals, dried stems, and hand-cut paper behind museum-grade glass. Signed on the reverse.'}
+        {product.description ?? 'A handmade piece composed from preserved florals, dried stems, and hand-cut paper behind museum-grade glass. Signed on the reverse.'}
       </Body>
 
       {/* Size selector */}
@@ -70,15 +51,11 @@ export default function PdpClient({ product }: { product: Product }) {
               key={v}
               onClick={() => setVariant(v)}
               style={{
-                padding: '10px 16px',
-                fontFamily: sans,
-                fontSize: 11,
-                letterSpacing: '0.18em',
-                textTransform: 'uppercase',
+                padding: '10px 16px', fontFamily: sans, fontSize: 11,
+                letterSpacing: '0.18em', textTransform: 'uppercase',
                 background: variant === v ? T.ink : 'transparent',
                 color: variant === v ? T.surface : T.ink,
-                border: `1px solid ${T.ink}`,
-                cursor: 'pointer',
+                border: `1px solid ${T.ink}`, cursor: 'pointer',
               }}
             >
               {v}
@@ -88,50 +65,13 @@ export default function PdpClient({ product }: { product: Product }) {
       </div>
 
       {/* Quantity + add to bag */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 40 }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            border: `1px solid ${T.ink}`,
-            fontFamily: sans,
-            fontSize: 13,
-          }}
-        >
-          <button
-            onClick={() => setQty((q) => Math.max(1, q - 1))}
-            style={{
-              padding: '0 16px',
-              height: 46,
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: 16,
-              color: T.ink,
-            }}
-          >
-            −
-          </button>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 40, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${T.ink}`, fontFamily: sans, fontSize: 13 }}>
+          <button onClick={() => setQty((q) => Math.max(1, q - 1))} style={{ padding: '0 16px', height: 46, background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: T.ink }}>−</button>
           <span style={{ padding: '0 16px', color: T.ink }}>{qty}</span>
-          <button
-            onClick={() => setQty((q) => q + 1)}
-            style={{
-              padding: '0 16px',
-              height: 46,
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: 16,
-              color: T.ink,
-            }}
-          >
-            +
-          </button>
+          <button onClick={() => setQty((q) => q + 1)} style={{ padding: '0 16px', height: 46, background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: T.ink }}>+</button>
         </div>
-        <OutlineBtn
-          invert
-          style={{ flex: 1, padding: '14px 28px' }}
-        >
+        <OutlineBtn invert style={{ flex: 1, padding: '14px 28px', minWidth: 180 }}>
           Add to bag — NT$ {(basePrice * qty).toLocaleString()}
         </OutlineBtn>
       </div>
@@ -139,29 +79,8 @@ export default function PdpClient({ product }: { product: Product }) {
       {/* Specs table */}
       <div>
         {SPECS.map(([h, b]) => (
-          <div
-            key={h}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '140px 1fr',
-              padding: '16px 0',
-              borderTop: `1px solid ${T.rule}`,
-              fontSize: 13,
-              gap: 16,
-              alignItems: 'baseline',
-            }}
-          >
-            <span
-              style={{
-                fontSize: 10,
-                letterSpacing: '0.22em',
-                textTransform: 'uppercase',
-                color: T.muted,
-                fontFamily: sans,
-              }}
-            >
-              {h}
-            </span>
+          <div key={h} style={{ display: 'grid', gridTemplateColumns: '120px 1fr', padding: '16px 0', borderTop: `1px solid ${T.rule}`, fontSize: 13, gap: 16, alignItems: 'baseline' }}>
+            <span style={{ fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: T.muted, fontFamily: sans }}>{h}</span>
             <span style={{ color: T.inkSoft, lineHeight: 1.6, fontFamily: sans }}>{b}</span>
           </div>
         ))}
