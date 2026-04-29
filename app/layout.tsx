@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Cormorant_Garamond, Inter } from 'next/font/google';
 import './globals.css';
+import { CartProvider } from '@/components/CartProvider';
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
@@ -34,7 +35,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${cormorant.variable} ${inter.variable}`}>
-      <body>{children}</body>
+      <body>
+        <CartProvider>{children}</CartProvider>
+      </body>
     </html>
   );
 }

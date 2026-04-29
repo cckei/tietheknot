@@ -1,18 +1,18 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { T, serif, sans } from '@/lib/tokens';
 
-export function Eyebrow({ children, style }: { children: ReactNode; style?: CSSProperties }) {
+export function Eyebrow({
+  children,
+  style,
+  className,
+}: {
+  children: ReactNode;
+  style?: CSSProperties;
+  className?: string;
+}) {
   return (
     <div
-      style={{
-        fontFamily: sans,
-        fontSize: 10,
-        letterSpacing: '0.28em',
-        textTransform: 'uppercase',
-        color: T.inkSoft,
-        fontWeight: 500,
-        ...style,
-      }}
+      className={`font-sans text-[10px] tracking-[0.28em] uppercase text-ink-soft font-medium ${className ?? ''}`}
+      style={style}
     >
       {children}
     </div>
@@ -25,26 +25,19 @@ export function Display({
   italic = false,
   as: Tag = 'h1',
   style,
+  className,
 }: {
   children: ReactNode;
   size?: number;
   italic?: boolean;
   as?: 'h1' | 'h2' | 'h3' | 'div';
   style?: CSSProperties;
+  className?: string;
 }) {
   return (
     <Tag
-      style={{
-        fontFamily: serif,
-        fontWeight: 400,
-        fontSize: size,
-        lineHeight: 1.02,
-        letterSpacing: '-0.01em',
-        color: T.ink,
-        margin: 0,
-        fontStyle: italic ? 'italic' : 'normal',
-        ...style,
-      }}
+      className={`font-serif font-normal leading-[1.02] tracking-[-0.01em] text-ink m-0 ${italic ? 'italic' : ''} ${className ?? ''}`}
+      style={{ fontSize: size, ...style }}
     >
       {children}
     </Tag>
@@ -55,29 +48,25 @@ export function Body({
   children,
   size = 15,
   style,
+  className,
 }: {
   children: ReactNode;
   size?: number;
   style?: CSSProperties;
+  className?: string;
 }) {
   return (
     <p
-      style={{
-        fontFamily: sans,
-        fontSize: size,
-        lineHeight: 1.6,
-        color: T.inkSoft,
-        margin: 0,
-        ...style,
-      }}
+      className={`font-sans leading-[1.6] text-ink-soft m-0 ${className ?? ''}`}
+      style={{ fontSize: size, ...style }}
     >
       {children}
     </p>
   );
 }
 
-export function Rule({ style }: { style?: CSSProperties }) {
-  return <div style={{ height: 1, background: T.rule, width: '100%', ...style }} />;
+export function Rule({ style, className }: { style?: CSSProperties; className?: string }) {
+  return <div className={`h-px bg-rule w-full ${className ?? ''}`} style={style} />;
 }
 
 export function OutlineBtn({
@@ -86,31 +75,24 @@ export function OutlineBtn({
   style,
   onClick,
   type = 'button',
+  disabled,
+  className,
 }: {
   children: ReactNode;
   invert?: boolean;
   style?: CSSProperties;
   onClick?: () => void;
   type?: 'button' | 'submit';
+  disabled?: boolean;
+  className?: string;
 }) {
   return (
     <button
       type={type}
       onClick={onClick}
-      style={{
-        fontFamily: sans,
-        fontSize: 11,
-        letterSpacing: '0.22em',
-        textTransform: 'uppercase',
-        fontWeight: 500,
-        padding: '14px 28px',
-        background: invert ? T.ink : 'transparent',
-        color: invert ? T.surface : T.ink,
-        border: `1px solid ${T.ink}`,
-        cursor: 'pointer',
-        display: 'inline-block',
-        ...style,
-      }}
+      disabled={disabled}
+      className={`font-sans text-[11px] tracking-[0.22em] uppercase font-medium py-[14px] px-7 border border-ink cursor-pointer inline-block ${invert ? 'bg-ink text-surface' : 'bg-transparent text-ink'} ${className ?? ''}`}
+      style={style}
     >
       {children}
     </button>

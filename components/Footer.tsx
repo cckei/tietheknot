@@ -1,4 +1,3 @@
-import { T, serif, sans } from '@/lib/tokens';
 import { Eyebrow } from './ui';
 
 const FOOTER_LINKS = [
@@ -9,22 +8,20 @@ const FOOTER_LINKS = [
 
 export function Footer() {
   return (
-    <footer style={{ padding: '60px 48px 32px', background: T.surface, borderTop: `1px solid ${T.rule}`, fontFamily: sans }}>
+    <footer className="px-12 pt-[60px] pb-8 bg-surface border-t border-rule font-sans">
       <div className="ttk-footer-grid">
         <div>
-          <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 28, color: T.ink }}>
-            tietheknot
-          </div>
-          <p style={{ fontFamily: sans, fontSize: 13, lineHeight: 1.6, color: T.inkSoft, marginTop: 12, maxWidth: 280 }}>
+          <div className="font-serif italic text-[28px] text-ink">tietheknot</div>
+          <p className="font-sans text-[13px] leading-[1.6] text-ink-soft mt-3 max-w-[280px]">
             A quiet boutique of preserved and dried florals, composed by hand in small batches. Taipei, est. 2024.
           </p>
         </div>
 
         {FOOTER_LINKS.map(({ heading, items }) => (
           <div key={heading}>
-            <Eyebrow style={{ marginBottom: 16 }}>{heading}</Eyebrow>
+            <Eyebrow className="mb-4">{heading}</Eyebrow>
             {items.map((item) => (
-              <div key={item} style={{ fontSize: 13, color: T.inkSoft, marginBottom: 8, cursor: 'pointer' }}>
+              <div key={item} className="text-[13px] text-ink-soft mb-2 cursor-pointer">
                 {item}
               </div>
             ))}
@@ -32,9 +29,9 @@ export function Footer() {
         ))}
       </div>
 
-      <div style={{ height: 1, background: T.rule, width: '100%' }} />
+      <div className="h-px bg-rule w-full" />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24, fontSize: 11, color: T.muted, letterSpacing: '0.1em', flexWrap: 'wrap', gap: 8 }}>
+      <div className="flex justify-between mt-6 text-[11px] text-muted tracking-[0.1em] flex-wrap gap-2">
         <span>© 2026 tietheknot.florist — All blooms handmade.</span>
         <span>Terms · Privacy · Shipping</span>
       </div>

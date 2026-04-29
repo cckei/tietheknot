@@ -1,22 +1,37 @@
+import { getShopifyProductByHandle, getShopifyProducts, type ShopifyProduct } from './shopify';
+
 export type Product = {
   id: string;
   handle: string;
   title: string;
   collection: string;
   price: string;
+  currencyCode: string;
+  rawPrice: number;
   img?: string;
+  images?: string[];
+  variants?: Array<{
+    id: string;
+    title: string;
+    availableForSale: boolean;
+    price: string;
+    rawPrice: number;
+    currencyCode: string;
+  }>;
   placeholder?: { tone: string; accent: string };
   description?: string;
   tall?: boolean;
 };
 
-export const PRODUCTS: Product[] = [
+const FALLBACK_PRODUCTS: Product[] = [
   {
     id: 'cottage-spring',
     handle: 'cottage-spring',
     title: 'Cottage in Spring',
     collection: 'Framed Gardens',
-    price: 'NT$ 4,800',
+    price: '£48',
+    currencyCode: 'GBP',
+    rawPrice: 48,
     img: '/assets/product-03.png',
     tall: true,
     description:
@@ -27,7 +42,9 @@ export const PRODUCTS: Product[] = [
     handle: 'seaside-cottage',
     title: 'Seaside Cottage',
     collection: 'Framed Gardens',
-    price: 'NT$ 5,200',
+    price: '£52',
+    currencyCode: 'GBP',
+    rawPrice: 52,
     img: '/assets/product-02.png',
     tall: true,
     description:
@@ -38,7 +55,9 @@ export const PRODUCTS: Product[] = [
     handle: 'meadow-house',
     title: 'Meadow House No. II',
     collection: 'Framed Gardens',
-    price: 'NT$ 5,400',
+    price: '£54',
+    currencyCode: 'GBP',
+    rawPrice: 54,
     img: '/assets/product-05.png',
     tall: true,
     description:
@@ -49,7 +68,9 @@ export const PRODUCTS: Product[] = [
     handle: 'cotton-wreath',
     title: 'Cotton & Fern Wreath',
     collection: 'Wreaths',
-    price: 'NT$ 3,600',
+    price: '£36',
+    currencyCode: 'GBP',
+    rawPrice: 36,
     img: '/assets/product-04.png',
     tall: true,
     description:
@@ -60,7 +81,9 @@ export const PRODUCTS: Product[] = [
     handle: 'mustard-shelf',
     title: 'Mustard Shelf Garden',
     collection: 'Home Accessories',
-    price: 'NT$ 2,800',
+    price: '£28',
+    currencyCode: 'GBP',
+    rawPrice: 28,
     img: '/assets/product-01.png',
     tall: true,
     description:
@@ -71,7 +94,9 @@ export const PRODUCTS: Product[] = [
     handle: 'autumn-field',
     title: 'Autumn Field',
     collection: 'Framed Gardens',
-    price: 'NT$ 4,600',
+    price: '£46',
+    currencyCode: 'GBP',
+    rawPrice: 46,
     placeholder: { tone: 'ivory', accent: 'mustard' },
   },
   {
@@ -79,7 +104,9 @@ export const PRODUCTS: Product[] = [
     handle: 'fern-hollow',
     title: 'Fern Hollow',
     collection: 'Framed Gardens',
-    price: 'NT$ 5,000',
+    price: '£50',
+    currencyCode: 'GBP',
+    rawPrice: 50,
     placeholder: { tone: 'sage', accent: 'fern' },
   },
   {
@@ -87,7 +114,9 @@ export const PRODUCTS: Product[] = [
     handle: 'rose-statice',
     title: 'Rose & Statice',
     collection: 'Dried Bouquets',
-    price: 'NT$ 2,400',
+    price: '£24',
+    currencyCode: 'GBP',
+    rawPrice: 24,
     placeholder: { tone: 'rose', accent: 'clay' },
   },
   {
@@ -95,7 +124,9 @@ export const PRODUCTS: Product[] = [
     handle: 'linen-cotton',
     title: 'Linen & Cotton',
     collection: 'Wreaths',
-    price: 'NT$ 3,200',
+    price: '£32',
+    currencyCode: 'GBP',
+    rawPrice: 32,
     placeholder: { tone: 'mist', accent: 'cotton' },
   },
   {
@@ -103,7 +134,9 @@ export const PRODUCTS: Product[] = [
     handle: 'morning-meadow',
     title: 'Morning Meadow',
     collection: 'Framed Gardens',
-    price: 'NT$ 4,900',
+    price: '£49',
+    currencyCode: 'GBP',
+    rawPrice: 49,
     placeholder: { tone: 'taupe', accent: 'sage' },
   },
   {
@@ -111,7 +144,9 @@ export const PRODUCTS: Product[] = [
     handle: 'goldenrod-vase',
     title: 'Goldenrod Vase',
     collection: 'Dried Bouquets',
-    price: 'NT$ 2,600',
+    price: '£26',
+    currencyCode: 'GBP',
+    rawPrice: 26,
     placeholder: { tone: 'mustard', accent: 'mustard' },
   },
   {
@@ -119,13 +154,68 @@ export const PRODUCTS: Product[] = [
     handle: 'small-garden-shelf',
     title: 'Small Garden Shelf',
     collection: 'Home Accessories',
-    price: 'NT$ 2,100',
+    price: '£21',
+    currencyCode: 'GBP',
+    rawPrice: 21,
     placeholder: { tone: 'ivory', accent: 'sage' },
   },
 ];
 
-export function getProductByHandle(handle: string): Product | undefined {
-  return PRODUCTS.find((p) => p.handle === handle);
+function formatPrice(amount: string, currencyCode: string): string {
+  const numericAmount = Number(amount);
+  if (Number.isNaN(numericAmount)) return `${currencyCode} ${amount}`;
+  return new Intl.NumberFormat('en-GB', {
+    style: 'currency',
+    currency: currencyCode,
+    maximumFractionDigits: 0,
+  }).format(numericAmount);
 }
 
-export const FEATURED_PRODUCTS = PRODUCTS.slice(0, 4);
+function mapShopifyProduct(product: ShopifyProduct): Product {
+  const images = product.images.edges.map((edge) => edge.node.url);
+  const variants = product.variants.edges.map((edge) => ({
+    id: edge.node.id,
+    title: edge.node.title,
+    availableForSale: edge.node.availableForSale,
+    price: formatPrice(edge.node.price.amount, edge.node.price.currencyCode),
+    rawPrice: Number(edge.node.price.amount),
+    currencyCode: edge.node.price.currencyCode,
+  }));
+
+  const minVariant = product.priceRange.minVariantPrice;
+
+  return {
+    id: product.id,
+    handle: product.handle,
+    title: product.title,
+    collection: product.collections.edges[0]?.node.title ?? 'Shop',
+    price: formatPrice(minVariant.amount, minVariant.currencyCode),
+    currencyCode: minVariant.currencyCode,
+    rawPrice: Number(minVariant.amount),
+    img: images[0],
+    images,
+    variants,
+    description: product.description,
+    tall: true,
+  };
+}
+
+export async function getProducts(): Promise<Product[]> {
+  const response = await getShopifyProducts();
+  if (!response?.products?.edges?.length) return FALLBACK_PRODUCTS;
+
+  return response.products.edges.map((edge) => mapShopifyProduct(edge.node));
+}
+
+export async function getProductByHandle(handle: string): Promise<Product | undefined> {
+  const response = await getShopifyProductByHandle(handle);
+  const shopifyProduct = response?.productByHandle;
+  if (shopifyProduct) return mapShopifyProduct(shopifyProduct);
+
+  return FALLBACK_PRODUCTS.find((p) => p.handle === handle);
+}
+
+export async function getFeaturedProducts(): Promise<Product[]> {
+  const products = await getProducts();
+  return products.slice(0, 4);
+}

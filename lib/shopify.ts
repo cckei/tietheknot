@@ -103,3 +103,22 @@ export async function getShopifyProductByHandle(handle: string) {
     { handle },
   );
 }
+
+const CART_CREATE_MUTATION = `
+  mutation CartCreate($lines: [CartLineInput!]!) {
+    cartCreate(input: { lines: $lines }) {
+      cart { checkoutUrl }
+      userErrors { field message }
+    }
+  }
+`;
+
+export async function createShopifyCheckout(
+  lines: Array<{ merchandiseId: string; quantity: number }>,
+): Promise<string | null> {
+  const data = await shopifyFetch<{ cartCreate: { cart: { checkoutUrl: string } | null } }>(
+    CART_CREATE_MUTATION,
+    { lines },
+  );
+  return data?.cartCreate?.cart?.checkoutUrl ?? null;
+}

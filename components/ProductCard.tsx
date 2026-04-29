@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { T, serif, sans } from '@/lib/tokens';
 import { PlaceholderFrame } from './PlaceholderFrame';
 import type { Product } from '@/lib/products';
 
@@ -12,30 +11,19 @@ export function ProductCard({
   showPrice?: boolean;
   density?: 'loose' | 'standard' | 'dense';
 }) {
-  const titleSize = density === 'dense' ? 16 : 20;
-  const padding = density === 'dense' ? 16 : 24;
-  const gap = density === 'dense' ? 10 : 16;
+  const titleSize = density === 'dense' ? 'text-base' : 'text-xl';
+  const padding = density === 'dense' ? 'p-4' : 'p-6';
+  const gap = density === 'dense' ? 'mt-2.5' : 'mt-4';
 
   return (
-    <Link href={`/products/${product.handle}`} style={{ textDecoration: 'none', display: 'block' }}>
-      <div
-        style={{
-          background: T.surface,
-          aspectRatio: '3/4',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding,
-          border: `1px solid ${T.rule}`,
-          overflow: 'hidden',
-        }}
-      >
+    <Link href={`/products/${product.handle}`} className="no-underline block">
+      <div className={`bg-surface aspect-[3/4] flex items-center justify-center border border-rule overflow-hidden ${padding}`}>
         {product.img ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={product.img}
             alt={product.title}
-            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+            className="max-w-full max-h-full object-contain"
           />
         ) : product.placeholder ? (
           <PlaceholderFrame
@@ -46,41 +34,15 @@ export function ProductCard({
         ) : null}
       </div>
 
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginTop: gap,
-          alignItems: 'baseline',
-        }}
-      >
+      <div className={`flex justify-between items-baseline ${gap}`}>
         <div>
-          <div
-            style={{
-              fontFamily: serif,
-              fontSize: titleSize,
-              fontStyle: 'italic',
-              color: T.ink,
-            }}
-          >
-            {product.title}
-          </div>
-          <div
-            style={{
-              fontSize: 10,
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              color: T.muted,
-              marginTop: 4,
-              fontFamily: sans,
-            }}
-          >
+          <div className={`font-serif italic text-ink ${titleSize}`}>{product.title}</div>
+          <div className="text-[10px] tracking-[0.2em] uppercase text-muted mt-1 font-sans">
             {product.collection}
           </div>
         </div>
-
         {showPrice && (
-          <div style={{ fontSize: 12, color: T.inkSoft, fontFamily: sans }}>{product.price}</div>
+          <div className="text-xs text-ink-soft font-sans">{product.price}</div>
         )}
       </div>
     </Link>

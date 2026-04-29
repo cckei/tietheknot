@@ -1,5 +1,7 @@
+'use client';
+
 import Link from 'next/link';
-import { T, serif, sans } from '@/lib/tokens';
+import { useCart } from './CartProvider';
 
 type NavPage = 'home' | 'shop' | 'about';
 
@@ -14,78 +16,64 @@ const MOBILE_LINKS = [
   { label: 'Shop', href: '/shop' },
   { label: 'About', href: '/about' },
   { label: 'Custom', href: '/about' },
-  { label: 'Bag (0)', href: '/' },
 ];
 
-const linkStyle = (active: boolean): React.CSSProperties => ({
-  color: T.ink,
-  textDecoration: 'none',
-  borderBottom: active ? `1px solid ${T.ink}` : 'none',
-  paddingBottom: 2,
-  whiteSpace: 'nowrap' as const,
-});
+function navLink(active: boolean) {
+  return `text-ink no-underline pb-0.5 whitespace-nowrap ${active ? 'border-b border-ink' : ''}`;
+}
 
 export function Nav({ page = 'home' }: { page?: NavPage }) {
+  const { totalQuantity, openCart } = useCart();
+
   return (
-    <header
-      style={{
-        borderBottom: `1px solid ${T.rule}`,
-        background: T.bg,
-        position: 'relative',
-        zIndex: 5,
-      }}
-    >
-      <div
-        className="ttk-nav"
-        style={{ fontFamily: sans, fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', fontWeight: 500 }}
-      >
+    <header className="border-b border-rule bg-bg relative z-[5]">
+      <div className="ttk-nav font-sans text-[11px] tracking-[0.22em] uppercase font-medium">
         {/* Left nav — hidden on mobile */}
         <nav className="ttk-nav-left">
           {LEFT_LINKS.map(({ label, href, key }) => (
-            <Link key={label} href={href} style={linkStyle(page === key)}>
+            <Link key={label} href={href} className={navLink(page === key)}>
               {label}
             </Link>
           ))}
         </nav>
 
         {/* Logo — always visible */}
-        <Link href="/" style={{ textAlign: 'center', textDecoration: 'none' }}>
-          <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 26, color: T.ink, lineHeight: 1 }}>
+        <Link href="/" className="text-center no-underline">
+          <div className="font-serif italic text-[26px] text-ink leading-none">
             tietheknot
           </div>
-          <div style={{ fontFamily: sans, fontSize: 9, letterSpacing: '0.42em', color: T.inkSoft, marginTop: 4 }}>
+          <div className="font-sans text-[9px] tracking-[0.42em] text-ink-soft mt-1">
             F L O R I S T
           </div>
         </Link>
 
         {/* Right nav — hidden on mobile */}
-        <nav className="ttk-nav-right" style={{ color: T.ink }}>
-          <Link href="/about" style={linkStyle(page === 'about')}>About</Link>
-          <span style={{ cursor: 'pointer' }}>Search</span>
-          <span style={{ cursor: 'pointer' }}>Account</span>
-          <span style={{ cursor: 'pointer' }}>
-            Bag <span style={{ color: T.muted }}>(0)</span>
-          </span>
+        <nav className="ttk-nav-right text-ink">
+          <Link href="/about" className={navLink(page === 'about')}>About</Link>
+          <span className="cursor-pointer">Search</span>
+          <span className="cursor-pointer">Account</span>
+          <button
+            onClick={openCart}
+            className="bg-transparent border-none font-sans text-[11px] tracking-[0.22em] uppercase text-ink font-medium p-0"
+          >
+            Bag <span className="text-muted">({totalQuantity})</span>
+          </button>
         </nav>
       </div>
 
-      {/* Mobile nav strip — shown only on mobile */}
-      <nav
-        className="ttk-nav-mobile"
-        style={{
-          fontFamily: sans,
-          fontSize: 11,
-          letterSpacing: '0.22em',
-          textTransform: 'uppercase',
-          fontWeight: 500,
-          borderTop: `1px solid ${T.rule}`,
-        }}
-      >
+      {/* Mobile nav strip */}
+      <nav className="ttk-nav-mobile font-sans text-[11px] tracking-[0.22em] uppercase font-medium border-t border-rule">
         {MOBILE_LINKS.map(({ label, href }) => (
-          <Link key={label} href={href} style={{ color: T.ink, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          <Link key={label} href={href} className="text-ink no-underline whitespace-nowrap">
             {label}
           </Link>
         ))}
+        <button
+          onClick={openCart}
+          className="bg-transparent border-none font-sans text-[11px] tracking-[0.22em] uppercase text-ink font-medium p-0 whitespace-nowrap"
+        >
+          Bag ({totalQuantity})
+        </button>
       </nav>
     </header>
   );

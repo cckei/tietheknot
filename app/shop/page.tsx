@@ -2,31 +2,33 @@ import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
 import { Eyebrow, Display, Body } from '@/components/ui';
 import { ProductCard } from '@/components/ProductCard';
-import { PRODUCTS } from '@/lib/products';
-import { T, sans } from '@/lib/tokens';
+import { getProducts } from '@/lib/products';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Shop' };
 
-const COLLECTIONS = ['All', 'Framed Gardens', 'Wreaths', 'Dried Bouquets', 'Home Accessories', 'Custom'];
 const DENSITIES = ['loose', 'standard', 'dense'] as const;
 type Density = (typeof DENSITIES)[number];
 
-export default function ShopPage({
+export default async function ShopPage({
   searchParams,
 }: {
-  searchParams: { collection?: string; density?: string; prices?: string };
+  searchParams: Promise<{ collection?: string; density?: string; prices?: string }>;
 }) {
-  const activeCollection = searchParams.collection ?? 'All';
-  const density = (DENSITIES.includes(searchParams.density as Density)
-    ? searchParams.density
+  const resolvedSearchParams = await searchParams;
+  const products = await getProducts();
+
+  const collections = ['All', ...Array.from(new Set(products.map((p) => p.collection)))];
+  const activeCollection = resolvedSearchParams.collection ?? 'All';
+  const density = (DENSITIES.includes(resolvedSearchParams.density as Density)
+    ? resolvedSearchParams.density
     : 'standard') as Density;
-  const showPrices = searchParams.prices !== 'off';
+  const showPrices = resolvedSearchParams.prices !== 'off';
 
   const filtered =
     activeCollection === 'All'
-      ? PRODUCTS
-      : PRODUCTS.filter((p) => p.collection === activeCollection);
+      ? products
+      : products.filter((p) => p.collection === activeCollection);
 
   function filterUrl(collection: string) {
     return `/shop?${new URLSearchParams({ collection, density, prices: showPrices ? 'on' : 'off' })}`;
@@ -37,36 +39,35 @@ export default function ShopPage({
   }
 
   return (
-    <div style={{ background: T.bg, fontFamily: sans, color: T.ink }}>
+    <div className="bg-bg font-sans text-ink">
       <Nav page="shop" />
 
       {/* Title band */}
-      <section className="ttk-section-md" style={{ borderBottom: `1px solid ${T.rule}` }}>
-        <Eyebrow>Shop — 63 pieces available</Eyebrow>
+      <section className="ttk-section-md border-b border-rule">
+        <Eyebrow>
+          {activeCollection === 'All'
+            ? `${products.length} ${products.length === 1 ? 'piece' : 'pieces'} available`
+            : `${filtered.length} ${filtered.length === 1 ? 'piece' : 'pieces'} in ${activeCollection}`}
+        </Eyebrow>
         <Display size={72} italic style={{ marginTop: 20, fontSize: 'clamp(36px, 6vw, 72px)' }}>
           The catalogue.
         </Display>
-        <Body size={15} style={{ maxWidth: 520, marginTop: 24 }}>
+        <Body size={15} className="max-w-[520px] mt-6">
           Browse our current edition. Each piece is one of one — when a garden is claimed, a new
           one takes its place on the shelf.
         </Body>
       </section>
 
       {/* Filter / sort bar */}
-      <div className="ttk-shop-bar" style={{ borderBottom: `1px solid ${T.rule}`, background: T.surface }}>
-        <div className="ttk-shop-tabs" style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase' }}>
-          {COLLECTIONS.map((c) => {
+      <div className="ttk-shop-bar border-b border-rule bg-surface">
+        <div className="ttk-shop-tabs font-sans text-[11px] tracking-[0.22em] uppercase">
+          {collections.map((c) => {
             const active = activeCollection === c;
             return (
               <a
                 key={c}
                 href={filterUrl(c)}
-                style={{
-                  cursor: 'pointer', color: active ? T.ink : T.inkSoft,
-                  borderBottom: active ? `1px solid ${T.ink}` : 'none',
-                  paddingBottom: 2, fontWeight: active ? 500 : 400,
-                  textDecoration: 'none', fontFamily: sans, whiteSpace: 'nowrap',
-                }}
+                className={`cursor-pointer no-underline whitespace-nowrap pb-0.5 font-sans ${active ? 'text-ink border-b border-ink font-medium' : 'text-ink-soft'}`}
               >
                 {c}
               </a>
@@ -74,16 +75,12 @@ export default function ShopPage({
           })}
         </div>
 
-        <div style={{ display: 'flex', gap: 12, fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', flexShrink: 0 }}>
+        <div className="flex gap-3 text-[11px] tracking-[0.22em] uppercase shrink-0">
           {DENSITIES.map((d) => (
             <a
               key={d}
               href={densityUrl(d)}
-              style={{
-                color: density === d ? T.ink : T.muted,
-                textDecoration: density === d ? 'underline' : 'none',
-                cursor: 'pointer', fontFamily: sans,
-              }}
+              className={`cursor-pointer font-sans no-underline ${density === d ? 'text-ink underline' : 'text-muted'}`}
             >
               {d}
             </a>
@@ -92,9 +89,9 @@ export default function ShopPage({
       </div>
 
       {/* Product grid */}
-      <section className="ttk-section-sm" style={{ paddingBottom: 96 }}>
+      <section className="ttk-section-sm pb-24">
         {filtered.length === 0 ? (
-          <Body size={15} style={{ textAlign: 'center', padding: '80px 0' }}>
+          <Body size={15} className="text-center py-20">
             No pieces in this collection yet — check back soon.
           </Body>
         ) : (
@@ -104,16 +101,6 @@ export default function ShopPage({
             ))}
           </div>
         )}
-
-        {/* Pagination */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 32, marginTop: 80, fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', fontFamily: sans, flexWrap: 'wrap' }}>
-          <span style={{ color: T.muted }}>← Prev</span>
-          <span style={{ borderBottom: `1px solid ${T.ink}`, paddingBottom: 2, color: T.ink }}>01</span>
-          <span style={{ color: T.inkSoft, cursor: 'pointer' }}>02</span>
-          <span style={{ color: T.inkSoft, cursor: 'pointer' }}>03</span>
-          <span style={{ color: T.muted }}>— 06</span>
-          <span style={{ cursor: 'pointer', color: T.ink }}>Next →</span>
-        </div>
       </section>
 
       <Footer />
