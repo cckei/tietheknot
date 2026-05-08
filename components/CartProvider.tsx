@@ -1,13 +1,23 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { createShopifyCheckout } from '@/lib/shopify';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  createCart,
+  addCartLines,
+  removeCartLines,
+  updateCartLines,
+  fetchCart,
+  type ShopifyCart,
+  type ShopifyCartLine,
+} from '@/lib/shopify';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 type CartItem = {
-  id: string;
+  id: string;           // Shopify cart line ID
+  variantId: string;
   productId: string;
   title: string;
-  variantId: string;
   variantTitle: string;
   price: string;
   rawPrice: number;
@@ -21,75 +31,165 @@ type CartContextValue = {
   items: CartItem[];
   totalQuantity: number;
   isOpen: boolean;
+  loading: boolean;
   openCart: () => void;
   closeCart: () => void;
-  addItem: (item: Omit<CartItem, 'id'>) => void;
-  removeItem: (id: string) => void;
+  addItem: (variantId: string, quantity?: number) => Promise<void>;
+  removeItem: (lineId: string) => Promise<void>;
+  updateQuantity: (lineId: string, quantity: number) => Promise<void>;
 };
 
-const CART_STORAGE_KEY = 'ttk-cart';
-const CartContext = createContext<CartContextValue | null>(null);
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
-  const [checkingOut, setCheckingOut] = useState(false);
+const CART_ID_KEY = 'ttk-cart-id';
 
-  useEffect(() => {
-    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
-    if (!raw) return;
-    try {
-      setItems(JSON.parse(raw) as CartItem[]);
-    } catch {
-      window.localStorage.removeItem(CART_STORAGE_KEY);
-    }
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
-
-  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
-  const currencyCode = items[0]?.currencyCode ?? 'GBP';
-  const totalPrice = items.reduce((sum, item) => sum + item.rawPrice * item.quantity, 0);
-  const formattedTotal = new Intl.NumberFormat('en-GB', {
+function formatPrice(amount: string, currencyCode: string): string {
+  const num = Number(amount);
+  return new Intl.NumberFormat('en-GB', {
     style: 'currency',
     currency: currencyCode,
     maximumFractionDigits: 0,
-  }).format(totalPrice);
+  }).format(Number.isNaN(num) ? 0 : num);
+}
 
-  const addItem = useCallback((item: Omit<CartItem, 'id'>) => {
-    setItems((prev) => {
-      const key = `${item.productId}:${item.variantId}`;
-      const existing = prev.find((e) => e.id === key);
-      if (existing) {
-        return prev.map((e) => e.id === key ? { ...e, quantity: e.quantity + item.quantity } : e);
+function mapLine(line: ShopifyCartLine): CartItem {
+  const { merchandise } = line;
+  return {
+    id: line.id,
+    variantId: merchandise.id,
+    productId: merchandise.product.id,
+    title: merchandise.product.title,
+    variantTitle: merchandise.title,
+    price: formatPrice(merchandise.price.amount, merchandise.price.currencyCode),
+    rawPrice: Number(merchandise.price.amount),
+    currencyCode: merchandise.price.currencyCode,
+    quantity: line.quantity,
+    image: merchandise.product.images.edges[0]?.node.url,
+    handle: merchandise.product.handle,
+  };
+}
+
+// ─── Context ─────────────────────────────────────────────────────────────────
+
+const CartContext = createContext<CartContextValue | null>(null);
+
+// ─── Provider ────────────────────────────────────────────────────────────────
+
+export function CartProvider({ children }: { children: React.ReactNode }) {
+  const [cart, setCart] = useState<ShopifyCart | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const cartIdRef = useRef<string | null>(null);
+
+  // On mount: restore cart from Shopify using saved cartId
+  useEffect(() => {
+    const savedId = window.localStorage.getItem(CART_ID_KEY);
+    if (!savedId) return;
+    cartIdRef.current = savedId;
+    fetchCart(savedId).then((c) => {
+      if (c) {
+        setCart(c);
+      } else {
+        // Cart expired or invalid — start fresh
+        window.localStorage.removeItem(CART_ID_KEY);
+        cartIdRef.current = null;
       }
-      return [...prev, { ...item, id: key }];
     });
-    setIsOpen(true);
   }, []);
 
-  const removeItem = useCallback((id: string) => {
-    setItems((prev) => prev.filter((e) => e.id !== id));
+  // Persist cartId whenever the cart changes
+  useEffect(() => {
+    if (cart?.id) {
+      window.localStorage.setItem(CART_ID_KEY, cart.id);
+      cartIdRef.current = cart.id;
+    }
+  }, [cart?.id]);
+
+  const items = useMemo<CartItem[]>(
+    () => (cart?.lines.edges ?? []).map((e) => mapLine(e.node)),
+    [cart],
+  );
+
+  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const totalAmount = cart?.cost.subtotalAmount;
+  const formattedTotal = totalAmount
+    ? formatPrice(totalAmount.amount, totalAmount.currencyCode)
+    : '—';
+
+  // ── Mutations ──────────────────────────────────────────────────────────────
+
+  const addItem = useCallback(async (variantId: string, quantity = 1) => {
+    setLoading(true);
+    try {
+      let updatedCart: ShopifyCart | null = null;
+
+      if (!cartIdRef.current) {
+        // No cart yet — create one
+        updatedCart = await createCart([{ merchandiseId: variantId, quantity }]);
+      } else {
+        // Check if this variant already has a line in the cart
+        const existingLine = cart?.lines.edges.find(
+          (e) => e.node.merchandise.id === variantId,
+        );
+        if (existingLine) {
+          // Bump quantity on the existing line
+          updatedCart = await updateCartLines(cartIdRef.current, [
+            { id: existingLine.node.id, quantity: existingLine.node.quantity + quantity },
+          ]);
+        } else {
+          // Add a new line
+          updatedCart = await addCartLines(cartIdRef.current, [
+            { merchandiseId: variantId, quantity },
+          ]);
+        }
+      }
+
+      if (updatedCart) {
+        setCart(updatedCart);
+        setIsOpen(true);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [cart]);
+
+  const removeItem = useCallback(async (lineId: string) => {
+    if (!cartIdRef.current) return;
+    setLoading(true);
+    try {
+      const updatedCart = await removeCartLines(cartIdRef.current, [lineId]);
+      if (updatedCart) setCart(updatedCart);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const updateQuantity = useCallback(async (lineId: string, quantity: number) => {
+    if (!cartIdRef.current) return;
+    setLoading(true);
+    try {
+      const updatedCart = await updateCartLines(cartIdRef.current, [{ id: lineId, quantity }]);
+      if (updatedCart) setCart(updatedCart);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);
 
   async function handleCheckout() {
-    if (items.length === 0 || checkingOut) return;
-    setCheckingOut(true);
-    const lines = items.map((item) => ({ merchandiseId: item.variantId, quantity: item.quantity }));
-    const url = await createShopifyCheckout(lines);
-    setCheckingOut(false);
-    if (url) window.location.href = url;
+    if (!cart?.checkoutUrl || loading) return;
+    window.location.href = cart.checkoutUrl;
   }
 
   const value = useMemo<CartContextValue>(
-    () => ({ items, totalQuantity, isOpen, openCart, closeCart, addItem, removeItem }),
-    [items, totalQuantity, isOpen, openCart, closeCart, addItem, removeItem],
+    () => ({ items, totalQuantity, isOpen, loading, openCart, closeCart, addItem, removeItem, updateQuantity }),
+    [items, totalQuantity, isOpen, loading, openCart, closeCart, addItem, removeItem, updateQuantity],
   );
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <CartContext.Provider value={value}>
@@ -145,18 +245,36 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                     <div className="font-serif italic text-base text-ink mb-1 leading-snug">
                       {item.title}
                     </div>
-                    {item.variantTitle !== 'Default' && (
+                    {item.variantTitle !== 'Default Title' && (
                       <div className="font-sans text-[10px] tracking-[0.14em] uppercase text-ink-soft mb-1.5">
                         {item.variantTitle}
                       </div>
                     )}
                     <div className="flex justify-between items-baseline mt-2">
-                      <span className="font-sans text-xs text-ink-soft">Qty {item.quantity}</span>
+                      {/* Quantity stepper */}
+                      <div className="flex items-center gap-2 font-sans text-xs text-ink-soft">
+                        <button
+                          disabled={loading}
+                          onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                          className="bg-transparent border border-rule w-6 h-6 flex items-center justify-center text-ink disabled:opacity-40"
+                        >
+                          −
+                        </button>
+                        <span>{item.quantity}</span>
+                        <button
+                          disabled={loading}
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="bg-transparent border border-rule w-6 h-6 flex items-center justify-center text-ink disabled:opacity-40"
+                        >
+                          +
+                        </button>
+                      </div>
                       <span className="font-sans text-[13px] text-ink">{item.price}</span>
                     </div>
                     <button
+                      disabled={loading}
                       onClick={() => removeItem(item.id)}
-                      className="mt-2.5 bg-transparent border-none font-sans text-[10px] tracking-[0.18em] uppercase text-muted p-0 underline"
+                      className="mt-2.5 bg-transparent border-none font-sans text-[10px] tracking-[0.18em] uppercase text-muted p-0 underline disabled:opacity-40"
                     >
                       Remove
                     </button>
@@ -176,10 +294,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             </div>
             <button
               onClick={handleCheckout}
-              disabled={checkingOut}
-              className={`w-full py-4 bg-ink text-surface border-none font-sans text-[11px] tracking-[0.22em] uppercase transition-opacity ${checkingOut ? 'opacity-70 cursor-wait' : 'cursor-pointer'}`}
+              disabled={loading}
+              className={`w-full py-4 bg-ink text-surface border-none font-sans text-[11px] tracking-[0.22em] uppercase transition-opacity ${loading ? 'opacity-70 cursor-wait' : 'cursor-pointer'}`}
             >
-              {checkingOut ? 'Preparing...' : 'Checkout'}
+              {loading ? 'Updating…' : 'Checkout'}
             </button>
           </div>
         )}

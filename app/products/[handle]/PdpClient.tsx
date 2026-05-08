@@ -75,20 +75,7 @@ export default function PdpClient({ product }: { product: Product }) {
         <OutlineBtn
           invert
           style={{ flex: 1, minWidth: 180 }}
-          onClick={() =>
-            addItem({
-              productId: product.id,
-              title: product.title,
-              variantId: selectedVariant.id,
-              variantTitle: selectedVariant.title,
-              price: selectedVariant.price,
-              rawPrice: selectedVariant.rawPrice,
-              currencyCode: selectedVariant.currencyCode,
-              quantity: qty,
-              image: product.img,
-              handle: product.handle,
-            })
-          }
+          onClick={() => addItem(selectedVariant.id, qty)}
         >
           Add to bag — {formatAmount(selectedVariant.rawPrice * qty, selectedVariant.currencyCode)}
         </OutlineBtn>
