@@ -42,6 +42,7 @@ type CartContextValue = {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const CART_ID_KEY = 'ttk-cart-id';
+const CHECKOUT_PENDING_KEY = 'ttk-checkout-pending';
 
 function formatPrice(amount: string, currencyCode: string): string {
   const num = Number(amount);
@@ -81,8 +82,29 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
   const cartIdRef = useRef<string | null>(null);
 
-  // On mount: restore cart from Shopify using saved cartId
+  // On mount: restore cart — but clear it if user returned from Shopify checkout
   useEffect(() => {
+    // If a checkout was initiated and the user came back from Shopify's domain,
+    // treat this as a completed (or abandoned) checkout and wipe the cart.
+    const pending = window.localStorage.getItem(CHECKOUT_PENDING_KEY);
+    if (pending) {
+      const referrer = document.referrer;
+      const shopifyDomain = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN ?? '';
+      // Strip subdomain prefix (e.g. "tietheknot-florist.myshopify.com" → "tietheknot-florist")
+      const storeName = shopifyDomain.split('.')[0];
+      const cameFromShopify =
+        referrer.includes('myshopify.com') ||
+        referrer.includes('accounts.shopify.com') ||
+        (storeName && referrer.includes(storeName));
+
+      if (cameFromShopify) {
+        window.localStorage.removeItem(CART_ID_KEY);
+        window.localStorage.removeItem(CHECKOUT_PENDING_KEY);
+        cartIdRef.current = null;
+        return; // leave cart empty
+      }
+    }
+
     const savedId = window.localStorage.getItem(CART_ID_KEY);
     if (!savedId) return;
     cartIdRef.current = savedId;
@@ -181,7 +203,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   async function handleCheckout() {
     if (!cart?.checkoutUrl || loading) return;
-    window.location.href = cart.checkoutUrl;
+
+    // Mark that a checkout was initiated so we can clear the cart on return
+    window.localStorage.setItem(CHECKOUT_PENDING_KEY, '1');
+
+    // Append a return_to URL so Shopify redirects back after payment.
+    // Shopify honours this on most checkout configurations; it is silently
+    // ignored when not supported (e.g. customer-accounts checkout).
+    const returnTo = `${window.location.origin}/order-confirmed`;
+    const separator = cart.checkoutUrl.includes('?') ? '&' : '?';
+    window.location.href = `${cart.checkoutUrl}${separator}return_to=${encodeURIComponent(returnTo)}`;
   }
 
   const value = useMemo<CartContextValue>(
