@@ -108,6 +108,31 @@ export async function getShopifyProductByHandle(handle: string) {
   );
 }
 
+export type ShopifyCollection = {
+  handle: string;
+  title: string;
+};
+
+const COLLECTIONS_QUERY = `
+  query Collections($first: Int!) {
+    collections(first: $first, sortKey: TITLE) {
+      edges {
+        node {
+          handle
+          title
+        }
+      }
+    }
+  }
+`;
+
+export async function getShopifyCollections() {
+  return shopifyFetch<{ collections: { edges: Array<{ node: ShopifyCollection }> } }>(
+    COLLECTIONS_QUERY,
+    { first: 24 },
+  );
+}
+
 // ─── Cart API ────────────────────────────────────────────────────────────────
 
 export type ShopifyCartLine = {

@@ -1,4 +1,5 @@
-import { Nav } from '@/components/Nav';
+import { NavShell } from '@/components/NavShell';
+import { getCollections } from '@/lib/products';
 import { Footer } from '@/components/Footer';
 import { Eyebrow, Display, Body } from '@/components/ui';
 import { ProductCard } from '@/components/ProductCard';
@@ -17,8 +18,9 @@ export default async function ShopPage({
 }) {
   const resolvedSearchParams = await searchParams;
   const products = await getProducts();
+  const collectionList = await getCollections();
 
-  const collections = ['All', ...Array.from(new Set(products.map((p) => p.collection)))];
+  const collections = ['All', ...collectionList.map((c) => c.title)];
   const activeCollection = resolvedSearchParams.collection ?? 'All';
   const density = (DENSITIES.includes(resolvedSearchParams.density as Density)
     ? resolvedSearchParams.density
@@ -40,7 +42,7 @@ export default async function ShopPage({
 
   return (
     <div className="bg-bg font-sans text-ink">
-      <Nav page="shop" />
+      <NavShell page="shop" />
 
       {/* Title band */}
       <section className="ttk-section-md border-b border-rule">

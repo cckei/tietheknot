@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { Nav } from '@/components/Nav';
+import { NavShell } from '@/components/NavShell';
 import { Footer } from '@/components/Footer';
 import { Display } from '@/components/ui';
 import { PlaceholderFrame } from '@/components/PlaceholderFrame';
@@ -34,7 +34,7 @@ export default async function ProductPage({ params }: { params: Promise<{ handle
 
   return (
     <div className="bg-bg font-sans text-ink">
-      <Nav page="shop" />
+      <NavShell page="shop" />
 
       {/* Breadcrumb */}
       <div className="px-12 py-5 border-b border-rule text-[11px] tracking-[0.22em] uppercase text-ink-soft bg-surface font-sans">

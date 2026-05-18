@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@import "swiper/css";
+@import "swiper/css/free-mode";
+@import "swiper/css/navigation";
+@import "swiper/css/thumbs";
 
 /* ─── Design tokens ────────────────────────────────────────────────── */
 
@@ -61,10 +65,23 @@
   .ttk-nav-right {
     @apply flex gap-7 justify-end;
   }
-  .ttk-nav-mobile {
-    @apply hidden justify-center gap-6 px-5 py-3 overflow-x-auto;
-    -webkit-overflow-scrolling: touch;
-    flex-shrink: 0;
+  .ttk-nav-menu-btn,
+  .ttk-nav-mobile-bag {
+    @apply hidden;
+  }
+  .ttk-nav-aside-root {
+    @apply fixed inset-0 z-[100];
+  }
+  .ttk-nav-aside-backdrop {
+    @apply absolute inset-0 bg-ink/40 border-none cursor-pointer;
+  }
+  .ttk-nav-aside {
+    @apply relative z-[1] h-full w-[min(320px,88vw)] bg-bg border-r border-rule px-6 py-8 overflow-y-auto;
+    animation: ttk-aside-in 0.25s ease-out;
+  }
+  @keyframes ttk-aside-in {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
   }
 
   /* Original editorial hero (hidden via class="hidden") */
@@ -129,7 +146,7 @@
     @apply grid gap-20;
     grid-template-columns: 1fr 1.2fr;
   }
-  .ttk-about-info { @apply grid grid-cols-3 gap-12; }
+  .ttk-about-info { @apply grid grid-cols-2 gap-12; }
 
   /* Shop */
   .ttk-shop-bar {
@@ -161,12 +178,24 @@
   /* ── Mobile ≤ 768px ────────────────────────────────────────────── */
   @media (max-width: 768px) {
     /* Nav */
-    .ttk-nav {
-      grid-template-columns: 1fr;
-      @apply justify-items-center px-5 py-4 gap-0;
-    }
     .ttk-nav-left, .ttk-nav-right { @apply hidden; }
-    .ttk-nav-mobile { @apply flex; }
+    .ttk-nav {
+      grid-template-columns: auto 1fr auto;
+      @apply items-center px-5 py-4;
+    }
+    .ttk-nav-logo {
+      @apply justify-self-center;
+    }
+    .ttk-nav-menu-btn,
+    .ttk-nav-mobile-bag {
+      @apply flex items-center;
+    }
+    .ttk-nav-menu-btn {
+      @apply justify-self-start;
+    }
+    .ttk-nav-mobile-bag {
+      @apply justify-self-end;
+    }
 
     /* Heroes */
     .ttk-hero { @apply grid-cols-1; grid-template-columns: unset; }

@@ -1,9 +1,26 @@
+import Link from 'next/link';
 import { Eyebrow } from './ui';
 
 const FOOTER_LINKS = [
-  { heading: 'Shop', items: ['Framed gardens', 'Wreaths', 'Dried bouquets', 'Home accessories'] },
-  { heading: 'Studio', items: ['Our story', 'Custom commissions', 'Care guide', 'Journal'] },
-  { heading: 'Contact', items: ['hello@tietheknot.florist', 'Visit by appointment', 'Instagram', 'Newsletter'] },
+  {
+    heading: 'Contact',
+    items: [
+      { text: 'Whatsapp', href: 'https://wa.me/447512028633', external: true },
+      { text: 'Instagram', href: 'https://www.instagram.com/tietheknot.florist', external: true },
+    ],
+  },
+  {
+    heading: 'Support',
+    items: [
+      { text: 'Flower Care Guide', href: '/flower-care' },
+      { text: 'FAQ', href: '/faq' },
+    ],
+  },
+] as const;
+
+const LEGAL_LINKS = [
+  { text: 'Privacy Policy', href: '/privacy' },
+  { text: 'Terms of Service', href: '/terms' },
 ] as const;
 
 export function Footer() {
@@ -13,7 +30,7 @@ export function Footer() {
         <div>
           <div className="font-serif italic text-[28px] text-ink">tietheknot</div>
           <p className="font-sans text-[13px] leading-[1.6] text-ink-soft mt-3 max-w-[280px]">
-            A quiet boutique of preserved and dried florals, composed by hand in small batches. Taipei, est. 2024.
+            Designed and crafted by TieTheKnot.Florist — where we celebrate the quiet poetry of flowers, preserved in time.
           </p>
         </div>
 
@@ -21,8 +38,16 @@ export function Footer() {
           <div key={heading}>
             <Eyebrow className="mb-4">{heading}</Eyebrow>
             {items.map((item) => (
-              <div key={item} className="text-[13px] text-ink-soft mb-2 cursor-pointer">
-                {item}
+              <div key={item.text} className="text-[13px] text-ink-soft mb-2">
+                {'external' in item && item.external ? (
+                  <a href={item.href} target="_blank" rel="noopener noreferrer" className="text-inherit no-underline">
+                    {item.text}
+                  </a>
+                ) : (
+                  <Link href={item.href} className="text-inherit no-underline">
+                    {item.text}
+                  </Link>
+                )}
               </div>
             ))}
           </div>
@@ -33,7 +58,16 @@ export function Footer() {
 
       <div className="flex justify-between mt-6 text-[11px] text-muted tracking-[0.1em] flex-wrap gap-2">
         <span>© 2026 tietheknot.florist — All blooms handmade.</span>
-        <span>Terms · Privacy · Shipping</span>
+        <span className="flex gap-2 flex-wrap">
+          {LEGAL_LINKS.map(({ text, href }, i) => (
+            <span key={href} className="flex gap-2">
+              {i > 0 && <span aria-hidden>·</span>}
+              <Link href={href} className="text-muted no-underline hover:opacity-70">
+                {text}
+              </Link>
+            </span>
+          ))}
+        </span>
       </div>
     </footer>
   );

@@ -1,4 +1,11 @@
-import { getShopifyProductByHandle, getShopifyProducts, type ShopifyProduct } from './shopify';
+import {
+  getShopifyCollections,
+  getShopifyProductByHandle,
+  getShopifyProducts,
+  type ShopifyProduct,
+} from './shopify';
+
+export type Collection = { title: string; handle: string };
 
 export type Product = {
   id: string;
@@ -218,4 +225,15 @@ export async function getProductByHandle(handle: string): Promise<Product | unde
 export async function getFeaturedProducts(): Promise<Product[]> {
   const products = await getProducts();
   return products.slice(0, 4);
+}
+
+export async function getCollections(): Promise<Collection[]> {
+  const response = await getShopifyCollections();
+  const fromShopify = response?.collections?.edges?.map((edge) => edge.node) ?? [];
+  if (fromShopify.length) return fromShopify;
+
+  return Array.from(new Set(FALLBACK_PRODUCTS.map((p) => p.collection))).map((title) => ({
+    title,
+    handle: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+  }));
 }

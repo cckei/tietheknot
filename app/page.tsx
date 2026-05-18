@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Nav } from '@/components/Nav';
+import { NavShell } from '@/components/NavShell';
 import { Footer } from '@/components/Footer';
 import { Eyebrow, Display, Body, OutlineBtn } from '@/components/ui';
 import { PlaceholderFrame } from '@/components/PlaceholderFrame';
@@ -9,7 +9,7 @@ export default async function HomePage() {
   const featuredProducts = await getFeaturedProducts();
   return (
     <div className="bg-bg font-sans text-ink min-h-screen">
-      <Nav page="home" />
+      <NavShell page="home" />
 
       {/* ── Hero — editorial split (hidden) ──────────────────────────── */}
       <section className="hidden ttk-hero border-b border-rule">
@@ -69,22 +69,14 @@ export default async function HomePage() {
               italic
               style={{ marginTop: 24, marginBottom: 32, fontSize: 'clamp(30px, 3.8vw, 52px)', lineHeight: 1.08 }}
             >
-              Designed to be<br />lived with,<br />not just looked at.
+              Flowers, <br />preserved in their own time
             </Display>
             <div className="w-9 h-px bg-rule mb-8" />
             <div className="flex flex-col gap-[22px]">
-              {[
-                'We started tietheknot.florist in 2018 with a genuine appreciation for plants in all their forms — not just flowers at their peak, but dried stems, pressed leaves, and the quiet textures nature leaves behind.',
-                "Dried flowers don't demand attention. They settle into a room, hold their shape, and stay. That understated quality is exactly what draws us to them — and to the slow, layered process of making with them.",
-                'Each piece combines natural dried flowers, preserved botanicals and pressed elements, worked together until even the smallest detail feels right. The result is handmade work with a natural, art-led character — designed to be lived with, not just looked at.',
-                'Originally a small studio in Hong Kong, we now work from the UK and ship to both. Our collection includes dried floral objects, home décor, bridal pieces, and botanical flower landscapes — framed artworks made entirely from real flowers.',
-              ].map((text, i) => (
-                <Body key={i} size={14} style={{ lineHeight: 1.78 }}>{text}</Body>
-              ))}
+            <Body size={14} style={{ lineHeight: 1.78 }}>Founded in 2018, tietheknot.florist creates art-led dried floral pieces designed for everyday living. The brand is rooted in an appreciation for the quiet beauty of plants in all their states. By combining natural dried flowers, preserved botanicals and pressed elements, each piece is thoughtfully composed with careful attention to detail. The works are created to sit gently within a space — whether as home décor, a personal collection, or a considered gift.</Body>
             </div>
             <div className="flex gap-4 mt-11 flex-wrap">
               <Link href="/shop" className="no-underline"><OutlineBtn invert>Shop the collection</OutlineBtn></Link>
-              <Link href="/about" className="no-underline"><OutlineBtn>Our story</OutlineBtn></Link>
             </div>
           </div>
         </div>
@@ -127,7 +119,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── Process band ─────────────────────────────────────────────── */}
-      <section className="ttk-section bg-surface border-b border-rule">
+      {/* <section className="ttk-section bg-surface border-b border-rule">
         <div className="ttk-grid-process">
           <div>
             <Eyebrow>The process</Eyebrow>
@@ -155,7 +147,7 @@ export default async function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* ── Journal teaser ───────────────────────────────────────────── */}
       <section className="ttk-section hidden">

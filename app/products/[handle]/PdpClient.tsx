@@ -80,6 +80,12 @@ export default function PdpClient({ product }: { product: Product }) {
           Add to bag — {formatAmount(selectedVariant.rawPrice * qty, selectedVariant.currencyCode)}
         </OutlineBtn>
       </div>
+
+
+      {/* remarks */}
+      <Body size={11} className="mb-2 italic text-ink-soft">A Note on Our Flowers: </Body>
+      <Body size={11} className="mb-2 italic text-ink-soft">All images are for reference only. Because every piece is made by hand from natural materials, each arrangement is its own — colours, textures and details will vary slightly from what's shown.</Body>
+      <Body size={11} className="mb-2 italic text-ink-soft">Flowers are seasonal, so occasionally a material may not be available. If that happens, we'll substitute something similar in keeping with the overall style and feel — without compromising on quality.</Body>
     </div>
   );
 }
