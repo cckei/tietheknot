@@ -6,7 +6,7 @@ const FOOTER_LINKS = [
     heading: 'Contact',
     items: [
       { text: 'Whatsapp', href: 'https://wa.me/447512028633', external: true },
-      { text: 'Instagram', href: 'https://www.instagram.com/tietheknot.florist', external: true },
+      { text: 'Instagram', href: 'https://www.instagram.com/tietheknot.floral', external: true },
     ],
   },
   {
