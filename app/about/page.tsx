@@ -32,7 +32,7 @@ export default function AboutPage() {
           <div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/assets/product-04.png"
+              src="/assets/P1530713_compressed.JPG"
               alt="Cotton & Fern Wreath"
               className="w-full"
               style={{ boxShadow: '0 20px 60px -30px rgba(42,42,38,0.35)' }}

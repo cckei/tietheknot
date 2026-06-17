@@ -39,21 +39,22 @@ export default function PdpClient({ product }: { product: Product }) {
         {product.description || 'No description available.'}
       </Body>
 
-      {/* Variant selector */}
-      <div className="mb-7">
-        <Eyebrow className="mb-3">Options</Eyebrow>
-        <div className="flex gap-2.5 flex-wrap">
-          {productVariants.map((variant) => (
-            <button
-              key={variant.id}
-              onClick={() => setVariantId(variant.id)}
-              className={`px-4 py-2.5 font-sans text-[11px] tracking-[0.18em] uppercase border border-ink cursor-pointer transition-opacity ${selectedVariant.id === variant.id ? 'bg-ink text-surface' : 'bg-transparent text-ink'} ${!variant.availableForSale ? 'opacity-50' : ''}`}
-            >
-              {variant.title}
-            </button>
-          ))}
+      {productVariants.length > 1 && (
+        <div className="mb-7">
+          <Eyebrow className="mb-3">Options</Eyebrow>
+          <div className="flex gap-2.5 flex-wrap">
+            {productVariants.map((variant) => (
+              <button
+                key={variant.id}
+                onClick={() => setVariantId(variant.id)}
+                className={`px-4 py-2.5 font-sans text-[11px] tracking-[0.18em] uppercase border border-ink cursor-pointer transition-opacity ${selectedVariant.id === variant.id ? 'bg-ink text-surface' : 'bg-transparent text-ink'} ${!variant.availableForSale ? 'opacity-50' : ''}`}
+              >
+                {variant.title}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Quantity + add to bag */}
       <div className="flex gap-3 mb-10 flex-wrap">
