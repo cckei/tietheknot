@@ -29,7 +29,10 @@ export default async function ProductPage({ params }: { params: Promise<{ handle
     (img): img is string => Boolean(img),
   );
   const relatedProducts = allProducts
-    .filter((candidate) => candidate.handle !== product.handle)
+    .filter(
+      (candidate) =>
+        candidate.handle !== product.handle && candidate.collection === product.collection,
+    )
     .slice(0, 4);
 
   return (
@@ -39,7 +42,14 @@ export default async function ProductPage({ params }: { params: Promise<{ handle
       {/* Breadcrumb */}
       <div className="px-12 py-5 border-b border-rule text-[11px] tracking-[0.22em] uppercase text-ink-soft bg-surface font-sans">
         <a href="/shop" className="text-ink-soft no-underline">Shop</a>
-        {' '}/ {product.collection} / <span className="text-ink">{product.title}</span>
+        {' '}/{' '}
+        <a
+          href={`/shop?collection=${encodeURIComponent(product.collection)}`}
+          className="text-ink-soft no-underline"
+        >
+          {product.collection}
+        </a>
+        {' '}/ <span className="text-ink">{product.title}</span>
       </div>
 
       {/* Main split */}
@@ -57,6 +67,7 @@ export default async function ProductPage({ params }: { params: Promise<{ handle
       </section>
 
       {/* Related products */}
+      {relatedProducts.length > 0 && (
       <section className="ttk-section">
         <Display size={36} italic as="h2" style={{ marginBottom: 40, fontSize: 'clamp(22px, 3vw, 36px)' }}>
           In the same series
@@ -79,6 +90,7 @@ export default async function ProductPage({ params }: { params: Promise<{ handle
           ))}
         </div>
       </section>
+      )}
 
       <Footer />
     </div>
