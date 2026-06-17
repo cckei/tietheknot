@@ -45,7 +45,7 @@ export default async function ShopPage({
       <NavShell page="shop" />
 
       {/* Title band */}
-      <section className="ttk-section-md border-b border-rule">
+      {/* <section className="ttk-section-md border-b border-rule">
         <Eyebrow>
           {activeCollection === 'All'
             ? `${products.length} ${products.length === 1 ? 'piece' : 'pieces'} available`
@@ -58,7 +58,7 @@ export default async function ShopPage({
           Browse our current edition. Each piece is one of one — when a garden is claimed, a new
           one takes its place on the shelf.
         </Body>
-      </section>
+      </section> */}
 
       {/* Filter / sort bar */}
       <div className="ttk-shop-bar border-b border-rule bg-surface">
